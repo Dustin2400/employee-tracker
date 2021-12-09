@@ -1,7 +1,7 @@
 const inquirer = require('inquirer');
 const { viewAllDepartments, addDepartment, removeDepartment }= require('./assets/js/department');
 const { viewAllRoles, addRole, removeRole }= require('./assets/js/role');
-const { viewAllEmployees, addEmployee, removeEmployee, updateRol }= require('./assets/js/employee');
+const { viewAllEmployees, addEmployee, removeEmployee, updateRole }= require('./assets/js/employee');
 
 function employerPrompt() {
     return inquirer.prompt([

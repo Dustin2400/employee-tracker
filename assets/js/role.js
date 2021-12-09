@@ -4,54 +4,43 @@ const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch
 const cTable = require('console.table');
 const db = require('../../config/connection');
 
+let departmentId;
+
 function viewAllRoles() {
-    async function getInfo() {
-        let queryUrl = 'http://localhost:3001/api/role';
-        const response = await fetch(queryUrl, {
-            method: 'GET',
-            headers: {
-                accept: 'application/json',
-                'Content-Type': 'application/json'
-            }
-        });
-        return response.json();
-        }
-        getInfo()
-        .then(data => {
+        const sql = `SELECT role.id, role.title, role.salary, department.name AS department
+        FROM role LEFT JOIN department
+        ON role.department_id = department.id;`;
+        db.promise().query(sql)
+        .then(([ data ]) => {
             console.table(data);
         });
 }
 
-function findID(answers) {
-    const sqlString = `SELECT department.id FROM department WHERE name = ${answers.department}`;
-    console.log(answers, 'before query');
-            db.query(sqlString, (err, result)=> {
-                if (err) {
-                    console.log(err);
-                    return;
-                }
-                department = result;
-                console.log(result, 'response')
-                return result;
-            });
+function getId(answers) {
+    const sql2 = `SELECT department.id FROM department WHERE name = '${answers.department}';`;
+    db.promise().query(sql2)
+    .then(([ response ])=> {
+        departmentId = response[0].id;
+        postRole(answers);
+    })
+}
+
+function postRole(answers) {
+                const sql3 = `INSERT INTO role (title, salary, department_id) VALUES (?,?,?);`;
+                const params = [answers.title, answers.salary, departmentId];
+
+                db.promise().query(sql3, params)
+                .then(([ data ]) => {
+                    const message = 'Added '+ answers.title + ' to the database.'
+                    console.log(message);
+                })
 }
 
 function addRole() {
-    let department;
     let departments = [];
-    async function getDepartments() {
-        let queryUrl = 'http://localhost:3001/api/department';
-        const response = await fetch(queryUrl, {
-            method: 'GET',
-            headers: {
-                accept: 'application/json',
-                'Content-Type': 'application/json'
-            }
-        });
-        return response.json();
-        }
-        getDepartments()
-        .then(data => {
+    const sql = `SELECT * FROM department;`;
+    db.promise().query(sql)
+        .then(([ data ]) => {
             for (i=0; i<data.length; i++) {
                 departments.push(data[i].name);
             }
@@ -78,39 +67,40 @@ function addRole() {
         ])
         })
         .then(answers => {
-            const id = findID(answers)
-            console.log(id, "id");
-            return answers;
+            return getId(answers);
         })
-            .then(answers => {
-                console.log(answers, 'pre-fetch');
-            async function setInfo() {
-                console.log(department);
-                let queryUrl = 'http://localhost:3001/api/role';
-                const roleObj = {
-                    title: answers.title,
-                    salary: answers.salary,
-                    department_id: department.id
-                };
-                const response = await fetch(queryUrl, {
-                    method: 'POST',
-                    headers: {
-                        accept: 'application/json',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(roleObj)
-                });
-                return response.json();
-                }
-                setInfo()
-            })
-                .then(data => {
-                    const message = 'Added ' + answers.input + ' to the database';
-                    console.log(message);
-                })
 }
 
-function removeRole() {}
+function removeRole() {
+    let roles = [];
+    const sql = `SELECT * FROM role;`;
+    db.promise().query(sql)
+    .then(([ data ]) => {
+        for (i=0; i<data.length; i++) {
+            roles.push(data[i].title);
+        }
+        return roles;
+    })
+    .then(() => {
+        return inquirer.prompt([
+            {
+                type: 'list',
+                name: 'title',
+                message: 'Which role do you want to remove?',
+                choices: roles
+            }
+        ])
+    })
+    .then(answers => {
+        const sql = `DELETE FROM role WHERE title = ?;`;
+        const params = answers.title;
+        db.promise().query(sql, params)
+        .then(() => {
+            const message = answers.title + ' has been removed.';
+            console.log(message);
+        });
+    });
+}
 
 module.exports = {
     viewAllRoles,

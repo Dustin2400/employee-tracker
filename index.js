@@ -1,4 +1,7 @@
 const inquirer = require('inquirer');
+const { viewAllDepartments, addDepartment, removeDepartment }= require('./assets/js/department');
+const { viewAllRoles, addRole, removeRole }= require('./assets/js/role');
+const { viewAllEmployees, addEmployee, removeEmployee, updateRol }= require('./assets/js/employee');
 
 function employerPrompt() {
     return inquirer.prompt([
@@ -15,7 +18,7 @@ function employerPrompt() {
                 'Update an employee role',
                 'Remove a department',
                 'Remove a role',
-                'Remove an employee'
+                'Remove an employee',
             ]
         }
     ])
@@ -54,5 +57,6 @@ function employerPrompt() {
         }
     })
 }
+
 
 employerPrompt()

@@ -22,7 +22,7 @@
 
   [GitHub](https://github.com/Dustin2400/employee-tracker)
 
-  [Heroku](https://watch.screencastify.com/v/vd05SwIFRnQtKmvUw7id)
+  [Video](https://watch.screencastify.com/v/vd05SwIFRnQtKmvUw7id)
 
 ##
   Made with ❤️ by Dustin Grijalva
